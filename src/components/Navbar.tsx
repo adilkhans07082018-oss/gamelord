@@ -14,7 +14,11 @@ async function getCategories() {
     const db = client.db('GameLord');
     // distinct gets unique array
     const cats = await db.collection('games').distinct('categories');
-    return cats.filter(c => c && c.trim().length > 0).sort();
+    const validCats = cats.filter(c => c && c.trim().length > 0).sort();
+    // Ensure PS3, PS4, PS5 are always available in the UI even if db is currently empty for them.
+    const customCats = ['PS3', 'PS4', 'PS5'];
+    customCats.forEach(c => { if (!validCats.includes(c)) validCats.unshift(c); });
+    return validCats;
   } catch {
     return [];
   }
