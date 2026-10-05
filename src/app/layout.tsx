@@ -45,6 +45,9 @@ export const metadata: Metadata = {
     description: "Download the best free PC Games, Repacks, and highly compressed games.",
     images: ['/icon.png'],
   },
+  verification: {
+    google: 'PN-LIdxlL03ktJtJd5WRcUwcb6gbCsBS1ZHumsAFpsk',
+  },
 };
 
 export default function RootLayout({
