@@ -36,18 +36,19 @@ export default function RootLayout({
 
         {/* Adsterra Pop-under Script Example: */}
         {/* <script data-cfasync="false" src="https://accountut.com/1/98962142a3df93330ef765d34a5c0032"></script> */}
+
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            try {
+              if (localStorage.getItem('adult-blur') !== 'false') {
+                document.documentElement.classList.add('adult-blur-enabled');
+              }
+            } catch (e) {}
+          `
+        }} />
       </head>
       <body className="bg-white dark:bg-black text-gray-900 dark:text-white min-h-screen flex flex-col antialiased transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <script dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                if (localStorage.getItem('adult-blur') !== 'false') {
-                  document.documentElement.classList.add('adult-blur-enabled');
-                }
-              } catch (e) {}
-            `
-          }} />
           <Navbar />
           <main className="flex-grow pt-14">
             {children}

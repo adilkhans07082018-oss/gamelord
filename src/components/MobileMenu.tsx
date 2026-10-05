@@ -36,10 +36,10 @@ export default function MobileMenu({ categories }: { categories: string[] }) {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
-    <div className="md:hidden flex items-center">
+    <div className="md:hidden flex items-center shrink-0">
       <button 
         onClick={toggleMenu} 
-        className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors z-50 relative"
+        className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors z-50 relative shrink-0"
         aria-label="Toggle Menu"
       >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
