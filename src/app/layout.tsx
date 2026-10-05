@@ -16,8 +16,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Game Catalog",
-  description: "Browse the best games",
+  metadataBase: new URL('https://gamelord.vercel.app'),
+  title: {
+    default: "GameLord - Download Free PC Games",
+    template: "%s | GameLord"
+  },
+  description: "Download the best free PC Games, Repacks, and highly compressed games. Direct download links and torrents for action, adventure, RPG, and more.",
+  keywords: ["free pc games", "download games", "game repacks", "highly compressed games", "pc games direct download", "GameLord"],
+  openGraph: {
+    title: "GameLord - Download Free PC Games",
+    description: "Download the best free PC Games, Repacks, and highly compressed games.",
+    url: 'https://gamelord.vercel.app',
+    siteName: 'GameLord',
+    images: [
+      {
+        url: '/icon.png',
+        width: 512,
+        height: 512,
+        alt: 'GameLord Logo'
+      }
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "GameLord - Download Free PC Games",
+    description: "Download the best free PC Games, Repacks, and highly compressed games.",
+    images: ['/icon.png'],
+  },
 };
 
 export default function RootLayout({

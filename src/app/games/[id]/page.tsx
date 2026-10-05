@@ -101,6 +101,39 @@ async function getGame(id: string) {
   }
 }
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const { id } = await params;
+  const game = await getGame(id);
+  if (!game) return { title: 'Game Not Found' };
+  
+  let cleanTitle = game.title.replace(/ free download/i, '').trim();
+  cleanTitle = cleanTitle.replace(/&#038;/g, '&').replace(/&amp;/g, '&').replace(/&#8211;/g, '-').replace(/&#8217;/g, "'").replace(/&#8220;/g, '"').replace(/&#8221;/g, '"');
+  
+  const desc = game.description 
+    ? (game.description.length > 150 ? game.description.substring(0, 150) + '...' : game.description) 
+    : `Download ${cleanTitle} for free on PC.`;
+
+  const ogImage = game.poster_image || 'https://gamelord.vercel.app/icon.png';
+
+  return {
+    title: cleanTitle,
+    description: desc,
+    openGraph: {
+      title: `${cleanTitle} | GameLord`,
+      description: desc,
+      url: `https://gamelord.vercel.app/games/${id}`,
+      images: [{ url: ogImage }],
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${cleanTitle} | GameLord`,
+      description: desc,
+      images: [ogImage],
+    },
+  };
+}
+
 export default async function GamePage({ params }: { params: { id: string } }) {
   const { id } = await params;
   const game = await getGame(id);
@@ -112,8 +145,30 @@ export default async function GamePage({ params }: { params: { id: string } }) {
   let cleanTitle = game.title.replace(/ free download/i, '').trim();
   cleanTitle = cleanTitle.replace(/&#038;/g, '&').replace(/&amp;/g, '&').replace(/&#8211;/g, '-').replace(/&#8217;/g, "'").replace(/&#8220;/g, '"').replace(/&#8221;/g, '"');
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": cleanTitle,
+    "description": game.description || cleanTitle,
+    "image": game.poster_image || 'https://gamelord.vercel.app/icon.png',
+    "url": `https://gamelord.vercel.app/games/${game.id}`,
+    "genre": game.categories || [],
+    "applicationCategory": "Game",
+    "operatingSystem": "Windows PC",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] font-sans pb-20 transition-colors duration-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       
       {/* Hero Section */}
       <div className="relative w-full h-[80vh] min-h-[600px] flex flex-col justify-end bg-gray-200 dark:bg-zinc-900 border-b border-gray-200 dark:border-white/10 transition-colors duration-300">
