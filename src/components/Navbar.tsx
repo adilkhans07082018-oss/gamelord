@@ -34,10 +34,10 @@ export default async function Navbar() {
         <div className="flex items-center justify-between h-16">
           
           {/* Left Side: Logo & Main Links */}
-          <div className="flex items-center gap-8 h-full">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="p-2 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition-colors">
-                <Gamepad2 className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-4 sm:gap-8 h-full shrink-0">
+            <Link href="/" className="flex items-center gap-2 group shrink-0">
+              <div className="p-2 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition-colors shrink-0">
+                <Gamepad2 className="w-6 h-6 text-white shrink-0" />
               </div>
               <span className="font-extrabold text-xl tracking-tight hidden sm:block">GAMELORD</span>
             </Link>

@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <nav class="fixed w-full z-50 bg-black/80 h-16 flex items-center justify-between px-4">
+        <div class="flex items-center gap-8 h-full">
+            <a href="/" class="flex items-center gap-2 group">
+                <div class="p-2 bg-blue-600 rounded-lg">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="2"></rect></svg>
+                </div>
+            </a>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-9 h-9 bg-red-500"></div>
+            <div class="w-5 h-5 bg-yellow-500"></div>
+            <div class="md:hidden flex items-center">
+                <button class="p-2 z-50 relative"><svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg></button>
+                <div class="fixed top-16 left-0 w-full bg-blue-900 z-40 transition-transform duration-300 -translate-y-full h-[calc(100vh-4rem)]">
+                    Menu Content
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

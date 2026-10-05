@@ -14,13 +14,17 @@ export function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return <div className="w-5 h-5"></div>;
+    return (
+      <button className="text-gray-400 opacity-50 flex items-center justify-center shrink-0 w-5 h-5">
+        <Sun className="h-5 w-5" strokeWidth={2.5} />
+      </button>
+    );
   }
 
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center justify-center"
+      className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center justify-center shrink-0 w-5 h-5"
       aria-label="Toggle theme"
     >
       {theme === "dark" ? (

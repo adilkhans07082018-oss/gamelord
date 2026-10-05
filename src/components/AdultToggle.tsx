@@ -28,15 +28,19 @@ export function AdultToggle() {
     }
   };
 
-  // Prevent hydration mismatch by not rendering the icon until mounted
+  // Prevent hydration mismatch by showing a neutral state during SSR
   if (blurEnabled === null) {
-    return <div className="w-9 h-9" />;
+    return (
+      <button className="w-10 h-10 flex items-center justify-center rounded-full transition-colors font-black text-sm text-gray-400 opacity-50 shrink-0">
+        <span>18+</span>
+      </button>
+    );
   }
 
   return (
     <button
       onClick={toggleBlur}
-      className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors font-black text-sm ${
+      className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors font-black text-sm shrink-0 ${
         blurEnabled 
           ? 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20' 
           : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
