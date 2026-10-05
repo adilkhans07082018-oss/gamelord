@@ -10,16 +10,11 @@ import AdBanner from '@/components/AdBanner';
 // ==========================================
 // 💰 MONETIZATION SETTINGS
 // ==========================================
-// To earn money, sign up for a link shortener (like ouo.io, shrinkearn.com, shorte.st)
-// and get your API URL. Paste the "Easy Link" format here.
-// Example for ouo.io: 'https://ouo.io/qs/YOUR_API_KEY?s='
-// Example for shrinkearn: 'https://shrinkearn.com/api?api=YOUR_API_KEY&url='
-// If left empty (''), links will go directly to the download host (no monetization).
-const LINK_SHORTENER_URL = ''; // <-- PASTE YOUR SHORTENER URL HERE
+// We are using our own highly-monetized internal redirect page!
+// No more shady third-party link shorteners blocking users.
 
-function wrapWithShortener(originalLink: string): string {
-  if (!LINK_SHORTENER_URL) return originalLink;
-  return `${LINK_SHORTENER_URL}${encodeURIComponent(originalLink)}`;
+function wrapWithRedirect(gameId: string, linkIndex: number): string {
+  return `/download/${gameId}?link=${linkIndex}`;
 }
 
 function getHostName(url: string): string {
@@ -279,7 +274,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
                      return (
                        <a
                          key={index}
-                         href={wrapWithShortener(link)}
+                         href={wrapWithRedirect(game.id, index)}
                          target="_blank"
                          rel="noopener noreferrer"
                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5 shadow-lg shadow-blue-600/30"
