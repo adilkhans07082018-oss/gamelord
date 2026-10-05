@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://gamelord.vercel.app'),
+  metadataBase: new URL('https://gamelord.site'),
   title: {
     default: "GameLord - Download Free PC Games",
     template: "%s | GameLord"
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "GameLord - Download Free PC Games",
     description: "Download the best free PC Games, Repacks, and highly compressed games.",
-    url: 'https://gamelord.vercel.app',
+    url: 'https://gamelord.site',
     siteName: 'GameLord',
     images: [
       {

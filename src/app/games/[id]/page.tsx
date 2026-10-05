@@ -113,7 +113,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     ? (game.description.length > 150 ? game.description.substring(0, 150) + '...' : game.description) 
     : `Download ${cleanTitle} for free on PC.`;
 
-  const ogImage = game.poster_image || 'https://gamelord.vercel.app/icon.png';
+  const ogImage = game.poster_image || 'https://gamelord.site/icon.png';
 
   return {
     title: cleanTitle,
@@ -121,7 +121,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     openGraph: {
       title: `${cleanTitle} | GameLord`,
       description: desc,
-      url: `https://gamelord.vercel.app/games/${id}`,
+      url: `https://gamelord.site/games/${id}`,
       images: [{ url: ogImage }],
       type: 'article',
     },
@@ -150,8 +150,8 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     "@type": "VideoGame",
     "name": cleanTitle,
     "description": game.description || cleanTitle,
-    "image": game.poster_image || 'https://gamelord.vercel.app/icon.png',
-    "url": `https://gamelord.vercel.app/games/${game.id}`,
+    "image": game.poster_image || 'https://gamelord.site/icon.png',
+    "url": `https://gamelord.site/games/${game.id}`,
     "genre": game.categories || [],
     "applicationCategory": "Game",
     "operatingSystem": "Windows PC",

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://gamelord.vercel.app';
+  const baseUrl = 'https://gamelord.site';
   
   return {
     rules: {

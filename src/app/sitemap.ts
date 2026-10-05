@@ -4,7 +4,7 @@ import clientPromise from '@/lib/mongodb';
 export const revalidate = 86400; // Cache for 24 hours
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://gamelord.vercel.app';
+  const baseUrl = 'https://gamelord.site';
   const sitemapEntries: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
