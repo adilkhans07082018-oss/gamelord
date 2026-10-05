@@ -4,6 +4,7 @@ import { Search, Menu, Gamepad2, ChevronDown } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { AdultToggle } from './AdultToggle';
 import SearchBar from './SearchBar';
+import MobileMenu from './MobileMenu';
 import clientPromise from '@/lib/mongodb';
 
 export const revalidate = 3600; // Revalidate categories every hour
@@ -84,9 +85,7 @@ export default async function Navbar() {
           <div className="md:hidden flex items-center gap-1 sm:gap-3">
             <AdultToggle />
             <ThemeToggle />
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors">
-              <Menu className="h-6 w-6" />
-            </button>
+            <MobileMenu categories={categories} />
           </div>
         </div>
       </div>
