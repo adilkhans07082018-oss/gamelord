@@ -34,7 +34,7 @@ export default async function Navbar() {
         <div className="flex items-center justify-between h-16 w-full">
           
           {/* Left Side: Logo & Main Links */}
-          <div className="flex items-center gap-4 sm:gap-8 h-full shrink-0">
+          <div className="flex items-center gap-4 sm:gap-8 h-full shrink-0 relative z-50">
             <Link href="/" className="flex items-center gap-2 group shrink-0">
               <div className="p-2 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition-colors shrink-0">
                 <Gamepad2 className="w-6 h-6 text-white shrink-0" />

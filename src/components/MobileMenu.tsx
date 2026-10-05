@@ -47,13 +47,13 @@ export default function MobileMenu({ categories }: { categories: string[] }) {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+        className={`fixed top-16 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
         onClick={toggleMenu}
       />
 
       {/* Mobile Menu Content */}
       <div 
-        className={`fixed top-16 left-0 w-full bg-white dark:bg-[#0a0a0a] shadow-xl border-b border-gray-100 dark:border-white/10 flex flex-col py-4 px-6 h-[calc(100vh-4rem)] overflow-y-auto z-40 transition-transform duration-300 ${isOpen ? 'translate-y-0' : '-translate-y-full'}`}
+        className={`fixed top-16 left-0 w-full bg-white dark:bg-[#0a0a0a] shadow-xl border-b border-gray-100 dark:border-white/10 flex flex-col py-4 px-6 max-h-[calc(100vh-4rem)] overflow-y-auto z-40 transition-all duration-300 origin-top ${isOpen ? 'opacity-100 scale-y-100 visible' : 'opacity-0 scale-y-95 invisible'}`}
       >
         {/* Mobile Search Bar */}
         <div className="mb-6">
