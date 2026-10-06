@@ -38,11 +38,19 @@ async function scrapeGameDetails(url) {
     if (!title) return null; // Not a valid game page
 
     // 2. Poster Image
-    let posterImg = $('.post-thumbnail img').first();
-    if (!posterImg.length) posterImg = $('.featured-image img').first();
-    if (!posterImg.length) posterImg = $('img[data-src]').first();
-    
-    let poster_image = posterImg.attr('data-src') || posterImg.attr('src') || $('img').eq(1).attr('src');
+    let poster_image = "";
+    $('.media-single-content img').each((i, el) => {
+        const src = $(el).attr('data-src') || $(el).attr('src');
+        if (src && !src.includes('svg+xml') && !src.includes('Logo.png')) {
+            poster_image = src;
+            return false;
+        }
+    });
+    if (!poster_image) {
+        $('.entry-content > p > img, article > div > img').first().each((i, el) => {
+             poster_image = $(el).attr('data-src') || $(el).attr('src');
+        });
+    }
     
     if (poster_image && poster_image.match(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/)) {
         poster_image = poster_image.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/, '$1');
@@ -91,10 +99,30 @@ async function scrapeGameDetails(url) {
 
     // 8. Screenshots
     const screenshots = [];
-    $('.gallery-item img, .post-content img, img[data-src]').each((i, el) => {
+    $('.gallery-icon img, .tiled-gallery-item img').each((i, el) => {
         const src = $(el).attr('data-src') || $(el).attr('src');
-        if (src && src !== poster_image && !src.includes('Logo.png') && !src.includes('svg+xml')) {
+        if (src && !src.includes('svg+xml') && !src.includes('Logo.png')) {
             screenshots.push(src);
+        }
+    });
+    if (screenshots.length === 0) {
+        $('.entry-content img, .post-content img').each((i, el) => {
+            if ($(el).closest('.rg-rel__card').length === 0 && $(el).closest('.crp_related').length === 0) {
+                const src = $(el).attr('data-src') || $(el).attr('src');
+                if (src && src !== poster_image && !src.includes('svg+xml') && !src.includes('Logo.png')) {
+                    screenshots.push(src);
+                }
+            }
+        });
+    }
+
+    // 9. Trailer (YouTube)
+    let trailer = null;
+    $('iframe').each((i, el) => {
+        const src = $(el).attr('src') || $(el).attr('data-src');
+        if (src && src.includes('youtube.com/embed/')) {
+            trailer = src;
+            return false;
         }
     });
 
@@ -109,6 +137,7 @@ async function scrapeGameDetails(url) {
         download_links,
         categories: [...new Set(categories)],
         screenshots,
+        trailer,
         created_at: new Date()
     };
 }
