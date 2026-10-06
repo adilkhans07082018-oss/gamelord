@@ -38,7 +38,12 @@ async function scrapeGameDetails(url) {
     if (!title) return null; // Not a valid game page
 
     // 2. Poster Image
-    let poster_image = $('.post-thumbnail img').attr('src') || $('.featured-image img').attr('src') || $('img').first().attr('src');
+    let posterImg = $('.post-thumbnail img').first();
+    if (!posterImg.length) posterImg = $('.featured-image img').first();
+    if (!posterImg.length) posterImg = $('img[data-src]').first();
+    
+    let poster_image = posterImg.attr('data-src') || posterImg.attr('src') || $('img').eq(1).attr('src');
+    
     if (poster_image && poster_image.match(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/)) {
         poster_image = poster_image.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/, '$1');
     }
@@ -86,9 +91,9 @@ async function scrapeGameDetails(url) {
 
     // 8. Screenshots
     const screenshots = [];
-    $('.gallery-item img, .post-content img').each((i, el) => {
-        const src = $(el).attr('src');
-        if (src && src !== poster_image) {
+    $('.gallery-item img, .post-content img, img[data-src]').each((i, el) => {
+        const src = $(el).attr('data-src') || $(el).attr('src');
+        if (src && src !== poster_image && !src.includes('Logo.png') && !src.includes('svg+xml')) {
             screenshots.push(src);
         }
     });
