@@ -2,6 +2,7 @@ import Link from 'next/link';
 import HeroSlider from '@/components/HeroSlider';
 import AdBanner from '@/components/AdBanner';
 import clientPromise from '@/lib/mongodb';
+import FallbackImage from '@/components/FallbackImage';
 import { Download, Gamepad2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export const revalidate = 60; // Revalidate every minute
@@ -202,8 +203,9 @@ export default async function Home({ searchParams }: Props) {
             {games.map((game, i) => (
               <Link href={`/games/${game.id}`} key={game.id} className="group flex flex-col relative rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:z-10 shadow-sm hover:shadow-2xl border border-transparent hover:border-blue-500/50 dark:hover:border-blue-400/50">
                 <div className="aspect-[3/4] w-full bg-gray-200 dark:bg-zinc-800 relative overflow-hidden">
-                  <img 
+                  <FallbackImage 
                     src={game.poster_image || getMockImage(i, 'portrait')} 
+                    fallbackSrc={game.screenshots?.[0] || getMockImage(i, 'portrait')}
                     className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${game.isAdult ? 'adult-content-image' : ''}`} 
                     alt={game.title} 
                   />
