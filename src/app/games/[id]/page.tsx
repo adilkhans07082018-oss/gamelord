@@ -260,7 +260,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
           <div className="w-full lg:w-1/3">
             <div className="sticky top-24 bg-white dark:bg-[#151515] rounded-2xl shadow-xl border border-gray-100 dark:border-white/5 p-6 z-20">
                <div className="mb-8 text-center">
-                  <p className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">Free</p>
+                  <p className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">Free Download</p>
                   <p className="text-sm text-gray-500">Includes all available updates</p>
                </div>
 
