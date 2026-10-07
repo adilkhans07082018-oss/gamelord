@@ -33,8 +33,8 @@ export default function Footer() {
             <h4 className="text-white font-bold text-xs uppercase tracking-widest mb-2">Support</h4>
             <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Help Center</Link>
             <Link href="/dmca" className="text-sm text-gray-400 hover:text-white transition-colors">DMCA Policy</Link>
-            <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
           </div>
 
           <div className="flex flex-col gap-3">
