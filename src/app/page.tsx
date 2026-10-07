@@ -77,7 +77,8 @@ async function getGamesData(page: number, limit: number = 24, category?: string,
       website: game.website_name,
       poster_image: highResPoster,
       categories,
-      isAdult
+      isAdult,
+      screenshots: game.screenshots || []
     };
   };
 
