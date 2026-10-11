@@ -7,7 +7,7 @@ import { Download, Gamepad2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRi
 
 export const revalidate = 60; // Revalidate every minute
 
-async function getGamesData(page: number, limit: number = 24, category?: string, searchQuery?: string) {
+async function getGamesData(page: number, limit: number = 40, category?: string, searchQuery?: string) {
   const client = await clientPromise;
   const db = client.db('GameLord');
   
@@ -132,7 +132,7 @@ export default async function Home({ searchParams }: Props) {
   const category = typeof params.category === 'string' ? params.category : undefined;
   const q = typeof params.q === 'string' ? params.q : undefined;
   
-  const { games, totalPages, heroGames } = await getGamesData(page, 24, category, q);
+  const { games, totalPages, heroGames } = await getGamesData(page, 40, category, q);
   
   if (!games || games.length === 0) {
     return (
