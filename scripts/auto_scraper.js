@@ -28,28 +28,30 @@ function cleanHtml(str) {
     return str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-async function scrapeGameDetails(url) {
+async function scrapeGameDetails(url, listingPoster = null, listingCategory = null) {
     const html = await fetchHtml(url);
     if (!html) return null;
     const $ = cheerio.load(html);
 
     // 1. Title
     let title = $('h1').first().text().trim();
-    if (!title) return null; // Not a valid game page
+    if (!title) return null;
 
-    // 2. Poster Image
-    let poster_image = "";
-    $('.media-single-content img').each((i, el) => {
-        const src = $(el).attr('data-src') || $(el).attr('src');
-        if (src && !src.includes('svg+xml') && !src.includes('Logo.png')) {
-            poster_image = src;
-            return false;
-        }
-    });
-    if (!poster_image) {
-        $('.entry-content > p > img, article > div > img').first().each((i, el) => {
-             poster_image = $(el).attr('data-src') || $(el).attr('src');
+    // 2. Poster Image (Prioritize listing featured box art)
+    let poster_image = listingPoster || "";
+    if (!poster_image || poster_image.includes('svg+xml')) {
+        $('.media-single-content img').each((i, el) => {
+            const src = $(el).attr('data-src') || $(el).attr('src');
+            if (src && !src.includes('svg+xml') && !src.includes('Logo.png')) {
+                poster_image = src;
+                return false;
+            }
         });
+        if (!poster_image) {
+            $('.entry-content > p > img, article > div > img').first().each((i, el) => {
+                 poster_image = $(el).attr('data-src') || $(el).attr('src');
+            });
+        }
     }
     
     if (poster_image && poster_image.match(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/)) {
@@ -72,7 +74,7 @@ async function scrapeGameDetails(url) {
         const text = $(el).text();
         if (text.length > 100 && !text.includes('SYSTEM REQUIREMENTS') && !text.includes('HOW TO DOWNLOAD')) {
             description = text.trim();
-            return false; // break loop
+            return false;
         }
     });
 
@@ -92,29 +94,23 @@ async function scrapeGameDetails(url) {
     });
 
     // 7. Categories
-    const categories = [];
+    const categories = listingCategory ? [listingCategory] : [];
     $('.category a, .tags a, [rel="category tag"]').each((i, el) => {
-        categories.push($(el).text().trim());
+        const c = $(el).text().trim();
+        if (c && !categories.includes(c)) categories.push(c);
     });
 
     // 8. Screenshots
     const screenshots = [];
-    $('.gallery-icon img, .tiled-gallery-item img').each((i, el) => {
+    $('.gallery-icon img, .tiled-gallery-item img, .gallery-item img').each((i, el) => {
         const src = $(el).attr('data-src') || $(el).attr('src');
-        if (src && !src.includes('svg+xml') && !src.includes('Logo.png')) {
-            screenshots.push(src);
+        if (src && !src.includes('svg+xml') && !src.includes('Logo.png') && !src.includes('avatar') && !src.includes('avatar.jpg')) {
+            const highRes = src.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/, '$1');
+            if (!screenshots.includes(highRes)) {
+                screenshots.push(highRes);
+            }
         }
     });
-    if (screenshots.length === 0) {
-        $('.entry-content img, .post-content img').each((i, el) => {
-            if ($(el).closest('.rg-rel__card').length === 0 && $(el).closest('.crp_related').length === 0) {
-                const src = $(el).attr('data-src') || $(el).attr('src');
-                if (src && src !== poster_image && !src.includes('svg+xml') && !src.includes('Logo.png')) {
-                    screenshots.push(src);
-                }
-            }
-        });
-    }
 
     // 9. Trailer (YouTube)
     let trailer = null;
@@ -149,53 +145,66 @@ async function runAutoScraper() {
         const db = client.db('GameLord');
         const gamesCollection = db.collection('games');
         
-        console.log("Fetching homepage of repack-games.com...");
-        const homepageHtml = await fetchHtml("https://repack-games.com/");
-        const $ = cheerio.load(homepageHtml);
-        
-        const gameLinks = [];
-        $('a').each((i, el) => {
-            const href = $(el).attr('href');
-            if (href && href.startsWith('https://repack-games.com/') && !href.includes('/page/') && !href.includes('/category/')) {
-                // simple heuristic for game links
-                if (href.split('/').length > 4) {
-                    gameLinks.push(href);
-                }
-            }
-        });
-
-        const uniqueLinks = [...new Set(gameLinks)];
-        console.log(`Found ${uniqueLinks.length} potential game links on homepage.`);
+        console.log("Fetching homepage and recent pages of repack-games.com...");
+        const pagesToScrape = [
+            'https://repack-games.com/',
+            'https://repack-games.com/page/2/'
+        ];
 
         let newGamesAdded = 0;
+        let postersUpdated = 0;
 
-        for (const link of uniqueLinks) {
-            // Check if game already exists in DB
-            const existing = await gamesCollection.findOne({ game_link: link });
-            if (existing) {
-                console.log(`[SKIP] Already in DB: ${link}`);
-                continue;
-            }
+        for (const pageUrl of pagesToScrape) {
+            const html = await fetchHtml(pageUrl);
+            if (!html) continue;
+            const $ = cheerio.load(html);
 
-            console.log(`[SCRAPING NEW GAME] ${link}`);
-            const gameData = await scrapeGameDetails(link);
-            
-            if (gameData && gameData.game_title && gameData.download_links.length > 0) {
-                await gamesCollection.insertOne(gameData);
-                console.log(`[ADDED] ${gameData.game_title}`);
-                newGamesAdded++;
-            } else {
-                console.log(`[FAILED/INVALID] Skipped ${link}`);
+            const posts = [];
+            $('.post').each((i, el) => {
+                const link = $(el).find('a').first().attr('href');
+                const img = $(el).find('img').attr('data-src') || $(el).find('img').attr('src');
+                const title = $(el).find('h2').text().trim();
+                const cat = $(el).find('.artbtn-category a').text().trim();
+                if (link && img && !img.includes('svg+xml')) {
+                    posts.push({ link, img, title, cat });
+                }
+            });
+
+            console.log(`Checking ${posts.length} games on ${pageUrl}...`);
+
+            for (const item of posts) {
+                const cleanTitle = item.title.replace(/\s+/g, ' ').trim();
+                const existing = await gamesCollection.findOne({
+                    $or: [
+                        { game_link: item.link },
+                        { game_title: { $regex: '^' + cleanTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', $options: 'i' } }
+                    ]
+                });
+
+                if (existing) {
+                    if (existing.poster_image !== item.img) {
+                        await gamesCollection.updateOne(
+                            { _id: existing._id },
+                            { $set: { poster_image: item.img } }
+                        );
+                        postersUpdated++;
+                    }
+                    continue;
+                }
+
+                console.log(`[SCRAPING NEW GAME] ${item.title}`);
+                const gameData = await scrapeGameDetails(item.link, item.img, item.cat);
+                if (gameData) {
+                    await gamesCollection.insertOne(gameData);
+                    newGamesAdded++;
+                    console.log(`[SAVED] ${gameData.game_title}`);
+                }
             }
-            
-            // Sleep 1 second to avoid getting blocked
-            await new Promise(r => setTimeout(r, 1000));
         }
 
-        console.log(`\nAuto-Scraper finished! Added ${newGamesAdded} new games.`);
-
-    } catch (error) {
-        console.error("Scraper Error:", error);
+        console.log(`Auto scraper finished. Added ${newGamesAdded} new games, updated ${postersUpdated} posters.`);
+    } catch (e) {
+        console.error("Auto scraper failed:", e);
     } finally {
         await client.close();
     }
