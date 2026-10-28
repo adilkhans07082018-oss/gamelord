@@ -58,14 +58,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
-        {/* ========================================== */}
-        {/* ?? GLOBAL AD NETWORK SCRIPTS (Pop-unders, Auto-Ads) */}
-        {/* ========================================== */}
-        {/* Google AdSense Global Script Example: */}
-        {/* <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossOrigin="anonymous"></script> */}
-
-        {/* Adsterra Pop-under Script Example: */}
-        {/* <script data-cfasync="false" src="https://accountut.com/1/98962142a3df93330ef765d34a5c0032"></script> */}
+        {/* Preconnect to Global Image CDN for instant image delivery */}
+        <link rel="preconnect" href="https://wsrv.nl" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://wsrv.nl" />
+        <link rel="preconnect" href="https://repack-games.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://repack-games.com" />
 
         <script dangerouslySetInnerHTML={{
           __html: `

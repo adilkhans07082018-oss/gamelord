@@ -4,6 +4,7 @@ import AdBanner from '@/components/AdBanner';
 import clientPromise from '@/lib/mongodb';
 import { unstable_cache } from 'next/cache';
 import FallbackImage from '@/components/FallbackImage';
+import { getOptimizedImageUrl } from '@/lib/image';
 import { Download, Gamepad2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export const revalidate = 60; // Revalidate every minute
@@ -101,10 +102,12 @@ async function getGamesData(page: number, limit: number = 40, category?: string,
       }
     }
 
-    let highResPoster = game.poster_image || null;
-    if (highResPoster) {
-      highResPoster = highResPoster.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/, '$1');
+    let rawPoster = game.poster_image || null;
+    if (rawPoster) {
+      rawPoster = rawPoster.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/, '$1');
     }
+    const highResPoster = rawPoster ? getOptimizedImageUrl(rawPoster, 320) : null;
+    const optimizedScreenshots = (game.screenshots || []).map((s: string) => getOptimizedImageUrl(s, 320));
 
     // Extract version badge (matching repack-games style)
     let version = 'V Initial Version';
@@ -132,19 +135,25 @@ async function getGamesData(page: number, limit: number = 40, category?: string,
       poster_image: highResPoster,
       categories,
       isAdult,
-      screenshots: game.screenshots || [],
+      screenshots: optimizedScreenshots,
       version
     };
   };
 
   const mappedGames = games.map(formatGame);
   
-  // Format and Sort the hero games so they follow our exact requested order
-  const heroGames = rawHeroGames.map(formatGame).sort((a, b) => {
+  // Format and Sort the hero games with high-res 1400px banner
+  const heroGames = rawHeroGames.map(g => {
+    const formatted = formatGame(g);
+    return {
+      ...formatted,
+      poster_image: g.poster_image ? getOptimizedImageUrl(g.poster_image, 1400) : formatted.poster_image
+    };
+  }).sort((a, b) => {
     const aIdx = featuredTitles.findIndex(t => new RegExp(t.split(' ')[0], 'i').test(a.title));
     const bIdx = featuredTitles.findIndex(t => new RegExp(t.split(' ')[0], 'i').test(b.title));
     return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
-  }).slice(0, 5); // ensure we only have 5
+  }).slice(0, 5);
 
   return {
     games: mappedGames,

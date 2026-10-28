@@ -2,11 +2,11 @@ import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 import { notFound } from 'next/navigation';
 import { Suspense, cache } from 'react';
-
 export const revalidate = 3600; // Cache on Vercel CDN for 1 hour
 import Link from 'next/link';
 import { Download, HardDrive, Gamepad2, ArrowLeft } from 'lucide-react';
 import DynamicMediaGallery from '@/components/DynamicMediaGallery';
+import { getOptimizedImageUrl } from '@/lib/image';
 import AdBanner from '@/components/AdBanner';
 
 // ==========================================
@@ -69,14 +69,9 @@ const getGame = cache(async (id: string) => {
       }
     }
     
-    let screenshots = game.screenshots || [];
     let trailer = game.trailer || null;
-    
-    // Force high resolution image by stripping WordPress resize suffixes
-    let highResPoster = game.poster_image || null;
-    if (highResPoster) {
-      highResPoster = highResPoster.replace(/-\d{2,4}x\d{2,4}(\.[a-zA-Z]+)$/, '$1');
-    }
+    const highResPoster = game.poster_image ? getOptimizedImageUrl(game.poster_image, 600) : null;
+    const optimizedScreenshots = (game.screenshots || []).map((s: string) => getOptimizedImageUrl(s, 1200));
 
     return {
       id: game._id.toString(),
@@ -90,13 +85,12 @@ const getGame = cache(async (id: string) => {
       website: game.website_name,
       poster_image: highResPoster,
       categories: game.categories || [],
-      screenshots,
+      screenshots: optimizedScreenshots,
       trailer
     };  } catch {
     return null;
   }
 });
-
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const { id } = await params;
   const game = await getGame(id);
@@ -320,4 +314,4 @@ export default async function GamePage({ params }: { params: { id: string } }) {
       </div>
     </div>
   );
-}
+}
