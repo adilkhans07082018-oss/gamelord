@@ -1,7 +1,9 @@
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
+
+export const revalidate = 3600; // Cache on Vercel CDN for 1 hour
 import Link from 'next/link';
 import { Download, HardDrive, Gamepad2, ArrowLeft } from 'lucide-react';
 import DynamicMediaGallery from '@/components/DynamicMediaGallery';
@@ -45,7 +47,7 @@ function getHostName(url: string): string {
   }
 }
 
-async function getGame(id: string) {
+const getGame = cache(async (id: string) => {
   try {
     const client = await clientPromise;
     const db = client.db('GameLord');
@@ -90,11 +92,10 @@ async function getGame(id: string) {
       categories: game.categories || [],
       screenshots,
       trailer
-    };
-  } catch {
+    };  } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const { id } = await params;

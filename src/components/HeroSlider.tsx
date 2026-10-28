@@ -36,6 +36,9 @@ export default function HeroSlider({ games }: { games: Game[] }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
           <img 
             src={game.poster_image || 'https://images.unsplash.com/photo-1605901309584-818e25960b8f?q=80&w=2070'} 
+            loading={index === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+            fetchPriority={index === 0 ? 'high' : 'auto'}
             className={`w-full h-full object-cover transition-transform duration-[10000ms] ${index === currentIndex ? 'scale-110' : 'scale-100'}`} 
             alt={game.title} 
           />
@@ -49,54 +52,55 @@ export default function HeroSlider({ games }: { games: Game[] }) {
             <p className="text-gray-200 text-sm md:text-lg mb-6 line-clamp-2 max-w-xl drop-shadow-md">
               Experience the next generation of gaming. Explore breathtaking worlds, overcome challenges, and discover an unforgettable journey.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-4">
               <Link 
                 href={`/games/${game.id}`}
-                className="bg-white text-black hover:bg-gray-200 font-bold py-3 px-8 rounded-lg inline-flex items-center gap-2 transition-colors text-sm sm:text-base shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg transition-transform duration-200 hover:scale-105"
               >
                 <Download className="w-5 h-5" />
-                Get Now
+                <span>Download Free</span>
               </Link>
               <Link 
                 href={`/games/${game.id}`}
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 font-bold py-3 px-8 rounded-lg inline-flex items-center transition-colors text-sm sm:text-base"
+                className="hidden sm:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3.5 rounded-xl backdrop-blur-md transition-all duration-200"
               >
-                Learn More
+                View Details
               </Link>
             </div>
           </div>
         </div>
       ))}
 
-      {/* Navigation Arrows */}
+      {/* Slider Controls */}
       {games.length > 1 && (
         <>
           <button 
             onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 md:p-3 bg-black/40 hover:bg-blue-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm shadow-xl"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 hover:scale-110"
+            aria-label="Previous Slide"
           >
-            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button 
             onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 md:p-3 bg-black/40 hover:bg-blue-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm shadow-xl"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-all opacity-0 group-hover:opacity-100 hover:scale-110"
+            aria-label="Next Slide"
           >
-            <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-        </>
-      )}
 
-      {/* Indicators */}
-      {games.length > 1 && (
-        <div className="absolute bottom-6 right-6 z-30 flex gap-2">
-          {games.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`h-1.5 md:h-2 rounded-full transition-all duration-300 ${idx === currentIndex ? 'bg-blue-500 w-8 md:w-12 shadow-[0_0_10px_rgba(59,130,246,0.8)]' : 'bg-white/40 hover:bg-white/80 w-3 md:w-4'}`}
-            />
-          ))}
-        </div>
+          {/* Indicators */}
+          <div className="absolute bottom-4 right-6 z-30 flex items-center gap-2">
+            {games.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-8 bg-blue-500' : 'w-2 bg-white/40 hover:bg-white/80'}`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

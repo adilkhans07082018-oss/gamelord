@@ -2,10 +2,47 @@ import Link from 'next/link';
 import HeroSlider from '@/components/HeroSlider';
 import AdBanner from '@/components/AdBanner';
 import clientPromise from '@/lib/mongodb';
+import { unstable_cache } from 'next/cache';
 import FallbackImage from '@/components/FallbackImage';
 import { Download, Gamepad2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export const revalidate = 60; // Revalidate every minute
+
+const featuredTitles = [
+  'Grand Theft Auto V / GTA 5 Free',
+  'Red Dead Redemption 2 Free',
+  'God Of War Free Download (2022)',
+  'Death Stranding 2 On The Beach',
+  'Far Cry 6 Ultimate Edition'
+];
+
+const getCachedHeroGames = unstable_cache(
+  async () => {
+    try {
+      const client = await clientPromise;
+      const db = client.db('GameLord');
+      const heroQuery = {
+        $or: featuredTitles.map(t => ({ game_title: { $regex: t.replace(/[()]/g, '\\export const revalidate = 60; // Revalidate every minute'), $options: 'i' } }))
+      };
+      return await db.collection('games').find(heroQuery, {
+        projection: {
+          game_title: 1,
+          game_size: 1,
+          website_name: 1,
+          poster_image: 1,
+          categories: 1,
+          system_requirements: 1,
+          screenshots: 1
+        }
+      }).limit(10).toArray();
+    } catch {
+      return [];
+    }
+  },
+  ['homepage-hero-games-cache'],
+  { revalidate: 86400 } // Cache hero games for 24 hours
+);
+
 
 async function getGamesData(page: number, limit: number = 40, category?: string, searchQuery?: string) {
   const client = await clientPromise;
@@ -22,23 +59,22 @@ async function getGamesData(page: number, limit: number = 40, category?: string,
     query.$text = { $search: searchQuery };
   }
 
-  // Exact featured titles for the slider
-  const featuredTitles = [
-    'Grand Theft Auto V / GTA 5 Free',
-    'Red Dead Redemption 2 Free',
-    'God Of War Free Download (2022)',
-    'Death Stranding 2 On The Beach',
-    'Far Cry 6 Ultimate Edition'
-  ];
-  
-  const heroQuery = {
-    $or: featuredTitles.map(t => ({ game_title: { $regex: t.replace(/[()]/g, '\\$&'), $options: 'i' } }))
-  };
+  const hasFilter = Boolean(category || searchQuery);
 
   const [games, totalGames, rawHeroGames] = await Promise.all([
-    collection.find(query).sort({ _id: -1 }).skip(skip).limit(limit).toArray(),
-    collection.countDocuments(query),
-    collection.find(heroQuery).limit(10).toArray()
+    collection.find(query, {
+      projection: {
+        game_title: 1,
+        game_size: 1,
+        website_name: 1,
+        poster_image: 1,
+        categories: 1,
+        system_requirements: 1,
+        screenshots: 1
+      }
+    }).sort({ _id: -1 }).skip(skip).limit(limit).toArray(),
+    hasFilter ? collection.countDocuments(query) : collection.estimatedDocumentCount(),
+    getCachedHeroGames()
   ]);
     
   const adultKeywords = ['adult', 'nud', 'nak', 'nsfw', '18+', 'hentai', 'sexual', 'erot', 'porn'];
@@ -231,6 +267,7 @@ export default async function Home({ searchParams }: Props) {
                   <FallbackImage 
                     src={game.poster_image || getMockImage(i, 'portrait')} 
                     fallbackSrc={game.screenshots?.[0] || getMockImage(i, 'portrait')}
+                    priority={i < 8}
                     className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${game.isAdult ? 'adult-content-image' : ''}`} 
                     alt={game.title} 
                   />

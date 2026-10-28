@@ -17,7 +17,10 @@ export default async function DownloadRedirectPage({
   try {
     const client = await clientPromise;
     const db = client.db('GameLord');
-    const game = await db.collection('games').findOne({ _id: new ObjectId(id) });
+    const game = await db.collection('games').findOne(
+      { _id: new ObjectId(id) },
+      { projection: { game_title: 1, download_links: 1 } }
+    );
 
     if (!game || !game.download_links || !game.download_links[linkIndex]) {
       notFound();

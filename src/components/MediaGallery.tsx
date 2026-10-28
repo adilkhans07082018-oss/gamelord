@@ -57,6 +57,9 @@ export default function MediaGallery({ poster, screenshots, trailer }: MediaGall
           <img 
             src={activeMedia.url} 
             alt="Game Media" 
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className="w-full h-full object-contain"
           />
         ) : (
@@ -99,6 +102,8 @@ export default function MediaGallery({ poster, screenshots, trailer }: MediaGall
               <img 
                 src={media.thumb || media.url} 
                 alt={`Thumbnail ${idx + 1}`} 
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
               {media.type === 'video' && (

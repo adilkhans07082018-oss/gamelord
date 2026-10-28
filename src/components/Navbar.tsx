@@ -6,23 +6,25 @@ import { AdultToggle } from './AdultToggle';
 import SearchBar from './SearchBar';
 import MobileMenu from './MobileMenu';
 import clientPromise from '@/lib/mongodb';
+import { unstable_cache } from 'next/cache';
 
-export const revalidate = 3600; // Revalidate categories every hour
-
-async function getCategories() {
-  try {
-    const client = await clientPromise;
-    const db = client.db('GameLord');
-    // distinct gets unique array
-    const cats = await db.collection('games').distinct('categories');
-    return cats.filter(c => c && c.trim().length > 0).sort();
-  } catch {
-    return [];
-  }
-}
+const getCachedCategories = unstable_cache(
+  async () => {
+    try {
+      const client = await clientPromise;
+      const db = client.db('GameLord');
+      const cats = await db.collection('games').distinct('categories');
+      return cats.filter((c: any) => c && typeof c === 'string' && c.trim().length > 0).sort();
+    } catch {
+      return [];
+    }
+  },
+  ['navbar-categories-list'],
+  { revalidate: 86400 } // Cache for 24 hours
+);
 
 export default async function Navbar() {
-  const categories = await getCategories();
+  const categories = await getCachedCategories();
 
   return (
     <nav className="fixed w-full z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 font-sans transition-colors duration-300">
@@ -50,7 +52,7 @@ export default async function Navbar() {
                   <Link href="/" className="block px-4 py-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border-b border-gray-100 dark:border-white/10 mb-1">
                     ALL GAMES
                   </Link>
-                  {categories.map((c) => (
+                  {categories.map((c: string) => (
                     <Link key={c} href={`/?category=${encodeURIComponent(c)}`} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-white transition-colors">
                       {c}
                     </Link>
@@ -60,29 +62,19 @@ export default async function Navbar() {
                   )}
                 </div>
               </div>
-
-              <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">NEWS</Link>
-              <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">SUPPORT</Link>
             </div>
           </div>
 
-          {/* Right Side */}
-          <div className="hidden md:flex items-center h-full">
-            <div className="flex items-center gap-2 sm:gap-4 h-full py-4">
-              <Suspense fallback={<div className="w-48 lg:w-64 h-9 bg-gray-100 dark:bg-white/5 rounded-full animate-pulse" />}>
-                <SearchBar />
-              </Suspense>
-              <AdultToggle />
-              <ThemeToggle />
-            </div>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-1 sm:gap-3">
+          {/* Right Side: Search & Toggles */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Suspense fallback={<div className="w-48 lg:w-64 h-9 bg-gray-100 dark:bg-white/5 rounded-full" />}>
+              <SearchBar />
+            </Suspense>
             <AdultToggle />
             <ThemeToggle />
             <MobileMenu categories={categories} />
           </div>
+
         </div>
       </div>
     </nav>
