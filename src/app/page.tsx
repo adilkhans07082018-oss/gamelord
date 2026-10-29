@@ -109,24 +109,6 @@ async function getGamesData(page: number, limit: number = 40, category?: string,
     const highResPoster = rawPoster ? getOptimizedImageUrl(rawPoster, 320) : null;
     const optimizedScreenshots = (game.screenshots || []).map((s: string) => getOptimizedImageUrl(s, 320));
 
-    // Extract version badge (matching repack-games style)
-    let version = 'V Initial Version';
-    const vMatch = title.match(/\b(v\d+(?:\.\d+)*(?:\.\w+)?)/i);
-    if (vMatch) {
-      version = `V ${vMatch[1].replace(/^v/i, '')}`;
-    } else {
-      const buildMatch = title.match(/\b(build\s*\d+)/i);
-      if (buildMatch) {
-        version = buildMatch[1].toUpperCase();
-      } else if (/final\s*release/i.test(title)) {
-        version = 'V Final Release';
-      } else if (/remastered/i.test(title)) {
-        version = 'V Remastered';
-      } else if (/deluxe/i.test(title)) {
-        version = 'V Deluxe';
-      }
-    }
-
     return {
       id: game._id.toString(),
       title,
@@ -135,8 +117,7 @@ async function getGamesData(page: number, limit: number = 40, category?: string,
       poster_image: highResPoster,
       categories,
       isAdult,
-      screenshots: optimizedScreenshots,
-      version
+      screenshots: optimizedScreenshots
     };
   };
 
@@ -264,54 +245,45 @@ export default async function Home({ searchParams }: Props) {
             </h2>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 lg:gap-6">
             {games.map((game, i) => (
               <Link 
                 href={`/games/${game.id}`} 
                 key={game.id} 
-                className="group flex flex-col bg-[#1c1c1c] dark:bg-[#141414] border border-white/10 hover:border-red-600 rounded-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl h-full"
+                className="group flex flex-col relative rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:z-10 shadow-sm hover:shadow-2xl border border-transparent hover:border-blue-500/50 dark:hover:border-blue-400/50"
               >
-                {/* Repack-style Thumbnail Container */}
-                <div className="aspect-[1/1.45] w-full bg-zinc-900 relative overflow-hidden">
+                <div className="aspect-[3/4] w-full bg-gray-200 dark:bg-zinc-800 relative overflow-hidden">
                   <FallbackImage 
                     src={game.poster_image || getMockImage(i, 'portrait')} 
                     fallbackSrc={game.screenshots?.[0] || getMockImage(i, 'portrait')}
                     priority={i < 8}
-                    className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${game.isAdult ? 'adult-content-image' : ''}`} 
+                    className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${game.isAdult ? 'adult-content-image' : ''}`} 
                     alt={game.title} 
                   />
-
-                  {/* Adult Content 18+ Overlay */}
                   {game.isAdult && (
-                    <div className="adult-content-overlay absolute inset-0 flex items-center justify-center opacity-0 z-10 transition-opacity bg-black/60">
-                      <span className="bg-red-600 text-white font-extrabold px-2.5 py-1 rounded text-xs tracking-widest shadow-lg">
+                    <div className="adult-content-overlay absolute inset-0 flex items-center justify-center opacity-0 z-10 transition-opacity bg-black/40">
+                      <span className="bg-red-600/90 text-white font-extrabold px-3 py-1 rounded-lg border border-red-400 backdrop-blur-sm text-sm tracking-widest shadow-lg">
                         18+
                       </span>
                     </div>
                   )}
-
-                  {/* Top-Right Badge: Version (Repack Games Style) */}
-                  <div className="absolute top-1.5 right-1.5 z-20 pointer-events-none">
-                    <span className="bg-[#FF5722] text-white text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded shadow tracking-wide">
-                      {game.version}
-                    </span>
-                  </div>
-
-                  {/* Bottom-Left Badge: Category (Repack Games Style) */}
-                  {game.categories && game.categories.length > 0 && (
-                    <div className="absolute bottom-1.5 left-1.5 z-20 pointer-events-none">
-                      <span className="bg-[#1e73be] text-white text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow">
-                        {game.categories[0]}
-                      </span>
-                    </div>
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
                 </div>
-
-                {/* Bottom Box: Game Title */}
-                <div className="p-2.5 flex-1 flex flex-col justify-center bg-[#1f1f1f] dark:bg-[#141414] border-t border-white/5 text-center">
-                  <h3 className="text-gray-100 font-bold text-xs sm:text-[13px] leading-snug line-clamp-2 group-hover:text-red-500 transition-colors">
-                    {game.title}
-                  </h3>
+                <div className="absolute bottom-0 left-0 w-full p-3 flex flex-col z-20">
+                  <h3 className="text-white font-bold text-sm leading-tight line-clamp-2 mb-1.5 drop-shadow-md">{game.title}</h3>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-blue-400 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
+                      {game.size}
+                    </span>
+                    {game.categories && game.categories.length > 0 && (
+                      <>
+                        <span className="text-gray-400 text-[10px]">•</span>
+                        <span className="text-purple-400 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider truncate max-w-[80px] sm:max-w-[100px]">
+                          {game.categories[0]}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
